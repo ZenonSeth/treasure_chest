@@ -1,5 +1,6 @@
 # Treasure Chest mod for Minetest
 
+<img height="150" src="screenshot.png" /> <img height="150" src="screenshot_form.png" />
 
 ## What is it?
 Treasure Chest is a small mod for the Minetest game that adds a kind of chest made for world designers.
