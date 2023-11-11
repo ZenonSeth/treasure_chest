@@ -1,4 +1,9 @@
 
+local MOD_NAME = minetest.get_current_modname() or "treasure_chest"
+local S = function(s) return s end
+if minetest.get_translator then S = minetest.get_translator(MOD_NAME) end
+
+treasure_chest = {}
 
 dofile(minetest.get_modpath("treasure_chest") .. "/utils.lua")
 
@@ -24,11 +29,11 @@ local fieldI4P = "i4p";
 local fieldI5P = "i5p";
 local buttonExit = "exit";
 
-local strDescription = "A chest that gives semi-randomized rewards per player";
-local strOneTime = "This is a one-time use chest, and you already opened it!";
-local strTooSoon = "To get another reward come back in ";
-local strFromRefreshLabel = "Refresh time, in minutes, integer. E.g.: 60 = 1 hour, 1440 = 1 day, 10080 = 1 week";
-local strProbabiltiesLabel = "Item probability of being given, integer, range 0..100: 0 = never, 100 = always";
+local strDescription = S("A chest that gives semi-randomized rewards per player");
+local strOneTime = S("This is a one-time use chest, and you already opened it!");
+local strTooSoon = S("To get another reward come back in ");
+local strFromRefreshLabel = S("Refresh time, in minutes, integer. E.g.: 60 = 1 hour, 1440 = 1 day, 10080 = 1 week");
+local strProbabiltiesLabel = S("Item probability of being given, integer, range 0..100: 0 = never, 100 = always");
 
 minetest.register_node("treasure_chest:treasure_chest", {
     description = strDescription,
@@ -109,9 +114,9 @@ minetest.register_node("treasure_chest:treasure_chest", {
                 and k ~= metaInt5p then
                     local tv = tonumber(v)
                     if tv then
-                        diff = gameTime - tv
+                        local diff = gameTime - tv
                         if diff > refresh * 60 then
-                            newMetaTable["fields"] = table.removeKey(newMetaTable["fields"], k)
+                            newMetaTable["fields"] = treasure_chest.removeKey(newMetaTable["fields"], k)
                         end
                     end
                 end
@@ -162,13 +167,13 @@ minetest.register_node("treasure_chest:treasure_chest", {
                     diff = math.floor(diff / 60 + 0.5)
                     local time = ""
                     if diff <= 1 then
-                        time = "1 minute"
+                        time = S("1 minute")
                     elseif diff < 60 then
-                        time = diff .. " minutes"
+                        time = diff .. S(" minutes")
                     elseif diff < 1440 then
-                        time = math.floor(diff/60 + 0.5) .. " hours"
+                        time = math.floor(diff/60 + 0.5) .. S(" hours")
                     else
-                        time = math.floor(diff/1440 + 0.5) .. " days"
+                        time = math.floor(diff/1440 + 0.5) .. S(" days")
                     end
                     reason = strTooSoon .. time
                 end
@@ -184,7 +189,7 @@ minetest.register_node("treasure_chest:treasure_chest", {
                     local metaAccessString = index.."p";
                     local probability = meta:get_int(metaAccessString);
                     print("wield list name = "..player:get_wield_list());
-                    if (randomCheck(probability)) then
+                    if (treasure_chest.randomCheck(probability)) then
                         local itemStackToAdd = nodeInv:get_stack("main", index+1);  -- +1 for inventory indexing begins at 1
                         itemStackToAdd = playerInv:add_item("main", itemStackToAdd);
                         if not itemStackToAdd:is_empty() then
@@ -202,31 +207,38 @@ minetest.register_node("treasure_chest:treasure_chest", {
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
     if formname == "treasure_chest:setup_inventory" then
-        local playerName = player:get_player_name();
+        local playerName = player:get_player_name()
 
         if (not fields[fieldRefresh]) then
             -- User cancelled, quit now
-            return true;
+            openedTreasureChestConfigs[playerName] = nil
+            return true
         end
 
-        local pos = openedTreasureChestConfigs[playerName];
+        local pos = openedTreasureChestConfigs[playerName]
         if pos == nil then
-            return;
+            return
         end
-        openedTreasureChestConfigs[playerName] = nil;
+        openedTreasureChestConfigs[playerName] = nil
+        
+        local meta = minetest.get_meta(pos)
+        
+        local owner = meta:get_string(metaStrOwner)
+        if not minetest.check_player_privs(player, "server") or owner ~= playerName then
+            return true
+        end
 
-        local meta = minetest.get_meta(pos);
         if meta:get_string(metaStrType) ~= metaExpectedType then
-            return;
+            return true
         end
 
-        meta:set_int(metaIntRefresh, clamp(toNum(fields[fieldRefresh], meta:get_int(metaIntRefresh)), -1, nil) );
-        meta:set_int(metaInt0p, clamp(toNum(fields[fieldI0P], meta:get_int(metaInt0p)), 0, 100));
-        meta:set_int(metaInt1p, clamp(toNum(fields[fieldI1P], meta:get_int(metaInt1p)), 0, 100));
-        meta:set_int(metaInt2p, clamp(toNum(fields[fieldI2P], meta:get_int(metaInt2p)), 0, 100));
-        meta:set_int(metaInt3p, clamp(toNum(fields[fieldI3P], meta:get_int(metaInt3p)), 0, 100));
-        meta:set_int(metaInt4p, clamp(toNum(fields[fieldI4P], meta:get_int(metaInt4p)), 0, 100));
-        meta:set_int(metaInt5p, clamp(toNum(fields[fieldI5P], meta:get_int(metaInt5p)), 0, 100));
+        meta:set_int(metaIntRefresh, treasure_chest.clamp(treasure_chest.toNum(fields[fieldRefresh], meta:get_int(metaIntRefresh)), -1, nil) )
+        meta:set_int(metaInt0p, treasure_chest.clamp(treasure_chest.toNum(fields[fieldI0P], meta:get_int(metaInt0p)), 0, 100))
+        meta:set_int(metaInt1p, treasure_chest.clamp(treasure_chest.toNum(fields[fieldI1P], meta:get_int(metaInt1p)), 0, 100))
+        meta:set_int(metaInt2p, treasure_chest.clamp(treasure_chest.toNum(fields[fieldI2P], meta:get_int(metaInt2p)), 0, 100))
+        meta:set_int(metaInt3p, treasure_chest.clamp(treasure_chest.toNum(fields[fieldI3P], meta:get_int(metaInt3p)), 0, 100))
+        meta:set_int(metaInt4p, treasure_chest.clamp(treasure_chest.toNum(fields[fieldI4P], meta:get_int(metaInt4p)), 0, 100))
+        meta:set_int(metaInt5p, treasure_chest.clamp(treasure_chest.toNum(fields[fieldI5P], meta:get_int(metaInt5p)), 0, 100))
         return true
     end
     return false

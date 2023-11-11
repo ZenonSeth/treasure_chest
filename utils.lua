@@ -1,4 +1,4 @@
-function table.removeKey(t, k)
+function treasure_chest.removeKey(t, k)
 	local i = 0
 	local keys, values = {},{}
 	for k,v in pairs(t) do
@@ -24,44 +24,7 @@ function table.removeKey(t, k)
 	return a
 end
 
-function splitStringToTable(inputString, splitter)
-    local ret = {};
-    local tmp;
-
-    if inputString == nil then return nil; end
-
-    if (splitter == nil) then
-        table.insert(ret, inputString);
-        return ret;
-    end
-
-    -- print("inputString: " .. inputString .. ", splitter:" .. splitter);
-    local found = true;
-    while found do
-        local s,e = inputString:find(splitter);
-        if s == nil then
-            table.insert(ret, inputString);
-            found = false;
-        else
-            -- print("s/e=" .. s .. "/" .. e);
-            tmp = inputString:sub(0,s - 1);
-            table.insert(ret, tmp);
-            inputString = inputString:sub(e + 1);
-        end
-    end
-    -- for k,v in pairs(ret) do print(k,v) end
-    return ret;
-end
-
-
-function tableLength(table)
-    if (table == nil) then return 0; end
-    local count = 0
-    for _ in pairs(table) do count = count + 1 end
-    return count
-end
-
-function clamp(value, min, max)
+function treasure_chest.clamp(value, min, max)
     if value == nil then return nil; end
     if max == nil and min == nil then return value; end
     if min == nil then return math.min(value, max); end
@@ -69,13 +32,13 @@ function clamp(value, min, max)
     return math.max(math.min(value, max), min);
 end
 
-function toNum(number, default)
+function treasure_chest.toNum(number, default)
     default = default or 0;
     return tonumber(number) or default;
 end
 
-function randomCheck(normalizedIntProb, minValue, maxValue)
-    minValue = toNum(minValue, 1);
-    maxValue = toNum(maxValue, 100);
-    return math.random(1,100) <= toNum(normalizedIntProb);
+function treasure_chest.randomCheck(normalizedIntProb, minValue, maxValue)
+    minValue = treasure_chest.toNum(minValue, 1);
+    maxValue = treasure_chest.toNum(maxValue, 100);
+    return math.random(1,100) <= treasure_chest.toNum(normalizedIntProb);
 end
