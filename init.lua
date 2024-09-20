@@ -5,8 +5,6 @@ if minetest.get_translator then S = minetest.get_translator(MOD_NAME) end
 
 treasure_chest = {}
 
--- local S = minetest.get_translator("treasure_chest")
-
 dofile(minetest.get_modpath("treasure_chest") .. "/utils.lua")
 
 local openedTreasureChestConfigs = {};
