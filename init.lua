@@ -32,8 +32,9 @@ local buttonExit = "exit";
 local strDescription = S("A chest that gives semi-randomized rewards per player");
 local strOneTime = S("This is a one-time use chest, and you already opened it!");
 local strTooSoon = S("To get another reward come back in ");
-local strFromRefreshLabel = S("Refresh time, in minutes, integer. E.g.: 60 = 1 hour, 1440 = 1 day, 10080 = 1 week");
-local strProbabiltiesLabel = S("Item probability of being given, integer, range 0..100: 0 = never, 100 = always");
+local strFromRefreshLabel = S("Refresh time, in minutes, integer. E.g.: 60 - 1 hour, 1440 - 1 day, 10080 - 1 week");
+local strProbabiltiesLabel = S("Item probability of being given, integer, range 0..100: 0 - never, 100 - always");
+local buttonSaveClose = S("Save & Close");
 
 minetest.register_node("treasure_chest:treasure_chest", {
     description = strDescription,
@@ -128,9 +129,9 @@ minetest.register_node("treasure_chest:treasure_chest", {
         if privs.server or owner == playerName then
             openedTreasureChestConfigs[playerName] = nodePos;
             minetest.show_formspec(playerName, "treasure_chest:setup_inventory",
-                "size[8,8]" ..
+                "size[9,8]" ..
 
-                "field[0.2,0.2;7.0,0.9;"..fieldRefresh..";"..strFromRefreshLabel..";".. refresh .."]"..
+                "field[0.2,0.2;9,1.1;"..fieldRefresh..";"..strFromRefreshLabel..";".. refresh .."]"..
 
                 "label[0.2,0.6;"..strProbabiltiesLabel.."]"..
 
@@ -142,7 +143,7 @@ minetest.register_node("treasure_chest:treasure_chest", {
                 "field[5.5,1.2;1,1;"..fieldI5P..";;"..i5p.."]"..
 
                 "list[nodemeta:"..spos..";main;0.2,1.8;6.0,1.0;]"..
-                "button_exit[1.0,2.8;3.0,1.0;"..buttonExit..";Save & Close]"..
+                "button_exit[1.0,2.8;3.0,1.0;"..buttonExit..";"..buttonSaveClose.."]"..
 
                 "list[current_player;main;0.0,4.0;8.0,4.0;]");
 
@@ -220,9 +221,9 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
             return
         end
         openedTreasureChestConfigs[playerName] = nil
-        
+
         local meta = minetest.get_meta(pos)
-        
+
         local owner = meta:get_string(metaStrOwner)
         if not minetest.check_player_privs(player, "server") or owner ~= playerName then
             return true

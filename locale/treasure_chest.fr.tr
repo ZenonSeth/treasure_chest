@@ -1,0 +1,16 @@
+# textdomain: treasure_chest
+
+# treasure_chest french translation
+# treasure_chest traduction en français
+# by d-stephane
+
+A chest that gives semi-randomized rewards per player=FR Un coffre qui donne des récompenses semi-aléatoires par joueur
+This is a one-time use chest, and you already opened it!=Vous ne pouvez ouvrir ce coffre qu'une seule fois et vous l’avez déjà ouvert !
+To get another reward come back in =Pour obtenir une autre récompense revenez dans
+Refresh time, in minutes, integer. E.g.: 60 - 1 hour, 1440 - 1 day, 10080 - 1 week=Temps de rafraîchissement en minutes. Nombre : 60 - 1 heure, 1440 - 1 jour, 10080 - 1 semaine
+Item probability of being given, integer, range 0..100: 0 - never, 100 - always=Probabilité de donner l'objet. Nombre, de 0 à 100 : 0 - jamais, 100 - toujours
+Save & Close=Sauver et fermer
+1 minute= 1 minute
+ minutes= minutes
+ hours= heures
+ days= jours
