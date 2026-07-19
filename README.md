@@ -6,36 +6,47 @@
 Treasure Chest is a small mod for the Minetest game that adds a kind of chest made for world designers.
 The chest has no crafting recipe, so it has to be obtained by /giveme or other commands.
 
-The intended use and original idea, comes from trying to design challenges in a survival world,
-and having some way to automatically reward players who complete the challenges.
+The idea is to help design challenges in a survival world, and give a way to automatically
+reward players who complete them.
 
-The rewards can be somewhat randomized, with a probability for each one, and can reset after
-a specified time, on a per user basis, after being given out.
+The rewards are randomized, with a chance for each item, and can reset after some time.
 
-When the chest is used by someone without the `give` privilege, the chest will attempt to give
-a copy of the items inside it (with some chance) to the user. The chest then records the last time
-this user has tried to get the items, and the user will then have to wait for a timeout period to
-expire before he/she can have a chance of obtaining the items again. This timeout period is per-user.
+## How it works for players
+When a player without admin access uses the chest, it tries to give a copy of each item inside
+it, based on the chance set for that item. The chest then remembers when this player last tried,
+and the player must wait before trying again. The player gets a chat message showing what they
+got and when they can try again.
 
-For someone with the `give` privilege, the chest will display a GUI that allows you to configure it.
+## How it works for admins
+A player who owns the chest, or has the treasurechest_admin privilege, sees a setup screen
+instead when using the chest.
 
-- 1st input: Refresh Time: An integer value
-  - The number of minutes of gametime that must pass before the chest can give its items out again.
-  - This is on a per-user basis, so two users can always obtain the reward if they use the chest, but if the same user tries to use it before the refresh timeout, he will get nothing.
+- Refresh time: minutes that must pass before a player can get rewards again.
+  - 0 means always give.
+  - -1 means the chest can only ever be used once per player.
+- Fixed schedule: when checked, all players share the same reset times, lined up with real
+  world midnight, instead of each player having their own timer. A label shows the time left
+  until the next shared reset.
+- Item chances: six numbers from 0 to 100, one for each item slot. 0 means never given, 100
+  means always given.
+- Item slots: six inventory slots holding the items to give out. Items are copied, not taken
+  from the chest.
+- Infotext: text shown when a player looks at the chest.
+- Update: saves the refresh time and fixed schedule setting without closing the screen.
+- Simulate Use: saves everything and rolls the chances once, showing what a player would have
+  gotten, without using up anyone's cooldown.
+- Save & Close: saves everything and closes the screen.
 
-- 2nd line: Six input: Integer values
-  - Probabilities, ranging 0..100, of how likely a reward is to be given to a user. Randomly determined each time the chest is used. Associated with the inventory slot below each one
+## Privileges
+- treasurechest_admin: lets a player set up and dig up chests they do not own.
+- The chest owner can always set up and dig up their own chest.
 
-- 3rd line: Six inventory slots
-  - The items to be given out, as associated by the probabilities above them. Each slot can hold a regular item stack. Items stacks are given out as a whole, so the user will get either the whole item stack, or nothing from that slot. Item stacks in these slots are not taken by regular users using the chest, instead they get copied.
-
-## License Info:
+## License Info
 
 See [license.txt](license.txt).
 
-
 ## Dependencies
-Minetest engine and Minetest game (see https://www.minetest.net)
+Minetest engine and Minetest game, see https://www.minetest.net
 
-## Bugs/contact info
+## Bugs and contact info
 Submit bugs on github: https://github.com/ZenonSeth/treasure_chest

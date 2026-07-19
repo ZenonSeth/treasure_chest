@@ -338,13 +338,7 @@ minetest.register_node("treasure_chest:treasure_chest", {
                 elseif refresh == 0 then
                     timeUntilNext = strAlwaysAvailable;
                 else
-                    local waitSeconds;
-                    if periodMode then
-                        local _, secondsUntilNext = getPeriodInfo(gameTime, periodSeconds);
-                        waitSeconds = secondsUntilNext;
-                    else
-                        waitSeconds = periodSeconds;
-                    end
+                    local waitSeconds = periodMode and secondsUntilNextBoundary or periodSeconds;
                     timeUntilNext = formatDuration(math.floor(waitSeconds / 60 + 0.5));
                 end
 
@@ -409,6 +403,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         if fields[buttonUpdateSchedule] or fields[fieldPeriodMode] ~= nil then
             meta:set_int(metaIntRefresh, refresh)
             meta:set_int(metaIntPeriodMode, periodMode and 1 or 0)
+            meta:set_string(metaStrInfotext, infotext)
 
             local spos = pos.x..","..pos.y..","..pos.z
             minetest.show_formspec(playerName, "treasure_chest:setup_inventory",
