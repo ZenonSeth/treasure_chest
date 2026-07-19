@@ -25,6 +25,7 @@ local metaInt3p = "3p";
 local metaInt4p = "4p";
 local metaInt5p = "5p";
 local metaIntPeriodMode = "periodMode";
+local metaStrInfotext = "infotext";
 
 local fieldRefresh = "refresh_interval";
 local fieldPeriodMode = "period_mode";
@@ -34,6 +35,7 @@ local fieldI2P = "i2p";
 local fieldI3P = "i3p";
 local fieldI4P = "i4p";
 local fieldI5P = "i5p";
+local fieldInfotext = "infotext_field";
 local buttonExit = "exit";
 local buttonUpdateSchedule = "update_schedule";
 local buttonSimulate = "simulate";
@@ -53,6 +55,7 @@ local strUpdateButton = S("Update");
 local strPeriodModeLabel = S("Fixed schedule: everyone shares the same reset boundary\n(refresh time above), instead of a per-player cooldown");
 local strGlobalResetLabel = S("Time until global reset: ");
 local strProbabiltiesLabel = S("Item probability of being given, integer, range 0..100: 0 = never, 100 = always");
+local strInfotextLabel = S("Infotext");
 local strSimulateButton = S("Simulate Use");
 local strPreviewLabel = S("Preview (what a user would receive):\n");
 local strPreviewNone = S("nothing");
@@ -141,8 +144,8 @@ local function getGlobalResetCountdownText(refresh, periodMode)
     return strGlobalResetLabel .. formatDurationDetailed(remainingMinutes);
 end
 
-local function getSetupFormspec(spos, refresh, periodMode, i0p, i1p, i2p, i3p, i4p, i5p, previewText)
-    local formspec = "size[8,11.5]" ..
+local function getSetupFormspec(spos, refresh, periodMode, i0p, i1p, i2p, i3p, i4p, i5p, infotext, previewText)
+    local formspec = "size[8,12.6]" ..
 
         "field[0.7,0.7;3.4,0.8;"..fieldRefresh..";"..strFromRefreshLabel..";".. refresh .."]"..
         "label[3.9,0.0;"..strExamples.."]"..
@@ -160,12 +163,15 @@ local function getSetupFormspec(spos, refresh, periodMode, i0p, i1p, i2p, i3p, i
         "field[5.5,3.2;1,1;"..fieldI5P..";;"..i5p.."]"..
 
         "list[nodemeta:"..spos..";main;0.2,3.8;6.0,1.0;]"..
-        "button[1.0,4.8;3.0,1.0;"..buttonSimulate..";"..strSimulateButton.."]"..
-        "button_exit[4.0,4.8;3.0,1.0;"..buttonExit..";Save & Close]"..
 
-        "label[0.2,5.9;"..minetest.formspec_escape(previewText or "").."]"..
+        "field[0.2,5.3;7.6,0.8;"..fieldInfotext..";"..strInfotextLabel..";"..minetest.formspec_escape(infotext or "").."]"..
 
-        "list[current_player;main;0.0,7.5;8.0,4.0;]";
+        "button[1.0,5.9;3.0,1.0;"..buttonSimulate..";"..strSimulateButton.."]"..
+        "button_exit[4.0,5.9;3.0,1.0;"..buttonExit..";Save & Close]"..
+
+        "label[0.2,7.0;"..minetest.formspec_escape(previewText or "").."]"..
+
+        "list[current_player;main;0.0,8.6;8.0,4.0;]";
 
     return formspec;
 end
@@ -234,6 +240,7 @@ minetest.register_node("treasure_chest:treasure_chest", {
         local i3p = meta:get_int(metaInt3p);
         local i4p = meta:get_int(metaInt4p);
         local i5p = meta:get_int(metaInt5p);
+        local infotext = meta:get_string(metaStrInfotext);
 
         -- clean up some metadata
         local tmp = meta:to_table()
@@ -242,6 +249,7 @@ minetest.register_node("treasure_chest:treasure_chest", {
             for k,v in pairs(tmp["fields"]) do
                 if  k ~= metaStrOwner
                 and k ~= metaStrType
+                and k ~= metaStrInfotext
                 and k ~= metaIntRefresh
                 and k ~= metaIntPeriodMode
                 and k ~= metaInt0p
@@ -266,7 +274,7 @@ minetest.register_node("treasure_chest:treasure_chest", {
         if privs.treasurechest_admin or owner == playerName then
             openedTreasureChestConfigs[playerName] = nodePos;
             minetest.show_formspec(playerName, "treasure_chest:setup_inventory",
-                getSetupFormspec(spos, refresh, periodMode, i0p, i1p, i2p, i3p, i4p, i5p, nil));
+                getSetupFormspec(spos, refresh, periodMode, i0p, i1p, i2p, i3p, i4p, i5p, infotext, nil));
 
         else
             local lastTime = meta:get_int(playerName);
@@ -394,6 +402,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         local i3p = treasure_chest.clamp(treasure_chest.toNum(fields[fieldI3P], meta:get_int(metaInt3p)), 0, 100)
         local i4p = treasure_chest.clamp(treasure_chest.toNum(fields[fieldI4P], meta:get_int(metaInt4p)), 0, 100)
         local i5p = treasure_chest.clamp(treasure_chest.toNum(fields[fieldI5P], meta:get_int(metaInt5p)), 0, 100)
+        local infotext = fields[fieldInfotext] or meta:get_string(metaStrInfotext)
 
         -- the period-mode checkbox submits immediately on click (unlike text fields, which need
         -- a button press), so treat that the same as the Update button: save and reshow, don't close
@@ -403,13 +412,14 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 
             local spos = pos.x..","..pos.y..","..pos.z
             minetest.show_formspec(playerName, "treasure_chest:setup_inventory",
-                getSetupFormspec(spos, refresh, periodMode, i0p, i1p, i2p, i3p, i4p, i5p, nil))
+                getSetupFormspec(spos, refresh, periodMode, i0p, i1p, i2p, i3p, i4p, i5p, infotext, nil))
             return true
         end
 
         if fields[buttonSimulate] then
             meta:set_int(metaIntRefresh, refresh)
             meta:set_int(metaIntPeriodMode, periodMode and 1 or 0)
+            meta:set_string(metaStrInfotext, infotext)
             meta:set_int(metaInt0p, i0p)
             meta:set_int(metaInt1p, i1p)
             meta:set_int(metaInt2p, i2p)
@@ -432,7 +442,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 
             local spos = pos.x..","..pos.y..","..pos.z
             minetest.show_formspec(playerName, "treasure_chest:setup_inventory",
-                getSetupFormspec(spos, refresh, periodMode, i0p, i1p, i2p, i3p, i4p, i5p, previewText))
+                getSetupFormspec(spos, refresh, periodMode, i0p, i1p, i2p, i3p, i4p, i5p, infotext, previewText))
             return true
         end
 
@@ -440,6 +450,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 
         meta:set_int(metaIntRefresh, refresh)
         meta:set_int(metaIntPeriodMode, periodMode and 1 or 0)
+        meta:set_string(metaStrInfotext, infotext)
         meta:set_int(metaInt0p, i0p)
         meta:set_int(metaInt1p, i1p)
         meta:set_int(metaInt2p, i2p)
