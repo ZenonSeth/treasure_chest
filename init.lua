@@ -7,6 +7,11 @@ treasure_chest = {}
 
 dofile(minetest.get_modpath("treasure_chest") .. "/utils.lua")
 
+minetest.register_privilege("treasurechest_admin", {
+    description = S("Can configure and dig up treasure chests placed by other players"),
+    give_to_singleplayer = false,
+})
+
 local openedTreasureChestConfigs = {};
 
 local metaStrType = "type";
@@ -180,7 +185,7 @@ minetest.register_node("treasure_chest:treasure_chest", {
         local privs = minetest.get_player_privs(playerName);
         local owner = meta:get_string(metaStrOwner);
 
-        if player:get_player_name() == owner or privs.give then
+        if player:get_player_name() == owner or privs.treasurechest_admin then
             return true;
         else
             return false;
@@ -252,7 +257,7 @@ minetest.register_node("treasure_chest:treasure_chest", {
         end
         -- end clean-up
 
-        if privs.server or owner == playerName then
+        if privs.treasurechest_admin or owner == playerName then
             openedTreasureChestConfigs[playerName] = nodePos;
             minetest.show_formspec(playerName, "treasure_chest:setup_inventory",
                 getSetupFormspec(spos, refresh, periodMode, i0p, i1p, i2p, i3p, i4p, i5p, nil));
@@ -335,7 +340,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         local meta = minetest.get_meta(pos)
 
         local owner = meta:get_string(metaStrOwner)
-        if not minetest.check_player_privs(player, "server") or owner ~= playerName then
+        if not (minetest.check_player_privs(player, "treasurechest_admin") or owner == playerName) then
             openedTreasureChestConfigs[playerName] = nil
             return true
         end
