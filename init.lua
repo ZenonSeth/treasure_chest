@@ -41,6 +41,12 @@ local buttonSimulate = "simulate";
 local strDescription = S("A chest that gives semi-randomized rewards per player");
 local strOneTime = S("This is a one-time use chest, and you already opened it!");
 local strTooSoon = S("To get another reward come back in ");
+local strChestHeader = S("Treasure Chest:");
+local strYouGot = S(" - You got ");
+local strYouGotNothing = S("nothing this time");
+local strTimeUntilNext = S("Time until you can get again: ");
+local strOneTimeReward = S("this was a one-time reward");
+local strAlwaysAvailable = S("always available");
 local strFromRefreshLabel = S("Refresh time, in minutes.");
 local strExamples = S("E.g.: 60 = 1 hour, 1440 = 1 day")
 local strUpdateButton = S("Update");
@@ -300,21 +306,44 @@ minetest.register_node("treasure_chest:treasure_chest", {
             else
                 local nodeInv = meta:get_inventory(); --minetest.get_inventory({type="node", pos=nodePos});
                 local playerInv = player:get_inventory();
-                local playerWieldedItem = player:get_wielded_item();
+                local given = {};
                 -- bit of hard-coding, relying we only have 6 slots. Consider that the formspec is also hardcoded, it's not a huge deal
                 for index=0,5,1 do
                     local metaAccessString = index.."p";
                     local probability = meta:get_int(metaAccessString);
-                    print("wield list name = "..player:get_wield_list());
                     if (treasure_chest.randomCheck(probability)) then
                         local itemStackToAdd = nodeInv:get_stack("main", index+1);  -- +1 for inventory indexing begins at 1
-                        itemStackToAdd = playerInv:add_item("main", itemStackToAdd);
                         if not itemStackToAdd:is_empty() then
-                            minetest.item_drop(itemStackToAdd, player, player:get_pos());
+                            table.insert(given, itemStackToAdd:get_short_description().." x"..itemStackToAdd:get_count());
+                            local leftover = playerInv:add_item("main", itemStackToAdd);
+                            if not leftover:is_empty() then
+                                minetest.item_drop(leftover, player, player:get_pos());
+                            end
                         end
                     end
                 end
                 meta:set_int(playerName, gameTime);
+
+                local timeUntilNext;
+                if refresh < 0 then
+                    timeUntilNext = strOneTimeReward;
+                elseif refresh == 0 then
+                    timeUntilNext = strAlwaysAvailable;
+                else
+                    local waitSeconds;
+                    if periodMode then
+                        local _, secondsUntilNext = getPeriodInfo(gameTime, periodSeconds);
+                        waitSeconds = secondsUntilNext;
+                    else
+                        waitSeconds = periodSeconds;
+                    end
+                    timeUntilNext = formatDuration(math.floor(waitSeconds / 60 + 0.5));
+                end
+
+                local itemsText = (#given > 0) and table.concat(given, ", ") or strYouGotNothing;
+                minetest.chat_send_player(playerName,
+                    strChestHeader .. "\n" .. strYouGot .. itemsText .. "\n" .. strTimeUntilNext .. timeUntilNext);
+
                 return playerInv:get_stack(player:get_wield_list(), player:get_wield_index());   -- the itemstack we have as input may no longer be valid due to the add_item call above
             end
         end
