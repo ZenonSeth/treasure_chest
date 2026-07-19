@@ -52,6 +52,7 @@ local strAlwaysAvailable = S("always available");
 local strFromRefreshLabel = S("Refresh time, in minutes.");
 local strExamples = S("E.g.: 60 = 1 hour, 1440 = 1 day")
 local strUpdateButton = S("Update");
+local strSaveCloseButton = S("Save & Close");
 local strPeriodModeLabel = S("Fixed schedule: everyone shares the same reset boundary\n(refresh time above), instead of a per-player cooldown");
 local strGlobalResetLabel = S("Time until global reset: ");
 local strProbabiltiesLabel = S("Item probability of being given, integer, range 0..100: 0 = never, 100 = always");
@@ -167,7 +168,7 @@ local function getSetupFormspec(spos, refresh, periodMode, i0p, i1p, i2p, i3p, i
         "field[0.2,5.3;7.6,0.8;"..fieldInfotext..";"..strInfotextLabel..";"..minetest.formspec_escape(infotext or "").."]"..
 
         "button[1.0,5.9;3.0,1.0;"..buttonSimulate..";"..strSimulateButton.."]"..
-        "button_exit[4.0,5.9;3.0,1.0;"..buttonExit..";Save & Close]"..
+        "button_exit[4.0,5.9;3.0,1.0;"..buttonExit..";"..strSaveCloseButton.."]"..
 
         "label[0.2,7.0;"..minetest.formspec_escape(previewText or "").."]"..
 

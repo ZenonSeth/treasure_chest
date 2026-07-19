@@ -1,0 +1,12 @@
+# textdomain: treasure_chest
+
+A chest that gives semi-randomized rewards per player=EN A chest that gives semi-randomized rewards per player
+This is a one-time use chest, and you already opened it!=This is a one-time use chest, and you already opened it!
+To get another reward come back in =To get another reward come back in
+Refresh time, in minutes, integer. E.g.: 60 - 1 hour, 1440 - 1 day, 10080 - 1 week=Refresh time, in minutes, integer. E.g.: 60 - 1 hour, 1440 - 1 day, 10080 - 1 week
+Item probability of being given, integer, range 0..100: 0 - never, 100 - always=Item probability of being given, integer, range 0..100: 0 - never, 100 - always
+Save & Close=Save & Close
+1 minute=1 minute
+ minutes= minutes
+ hours= hours
+ days= days
